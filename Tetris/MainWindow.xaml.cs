@@ -18,6 +18,12 @@ using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
+    // TODO : disable left and right move
+    // TODO : add all shapes
+    // TODO : Rotate shapes
+    // TODO : Remove lines, counting score, reduce timer interval
+    // TODO : pause and new game
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -39,7 +45,17 @@ namespace Tetris
 
         private void _gameTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _currrentShape.MoveDown();
+            Dispatcher.Invoke(() =>
+            {
+                if (IsCurrentShapeStacked())
+                {
+                    _currrentShape = new Square(canvas);
+                }
+                else
+                {
+                    _currrentShape.MoveDown();
+                }
+            });
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -66,9 +82,58 @@ namespace Tetris
             }
         }
 
+        private bool IsCurrentShapeStacked()
+        {
+            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            {
+                double bottomOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape) + 30;
+                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
+
+                if (bottomOfItemOfCurrentShape == canvas.Height)  // if bottom edge of canvas
+                {
+                    return true;
+                }
+                else
+                {
+                    foreach (var itemOfCanvas in canvas.Children)
+                    {
+                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                        double leftOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas);
+
+                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        {
+                            continue;
+                        }
+                        else if (bottomOfItemOfCurrentShape == topOfCanvasItem && leftOfItemOfCurrentShape == leftOfCanvasItem)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool IsItemOfCurrentShape(Border item)
+        {
+            double topOfItem = Canvas.GetTop((Border)item);
+            double leftOfItem = Canvas.GetLeft((Border)item);
+
+            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            {
+                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
+                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
+
+                if (topOfItem == topOfItemOfCurrentShape && leftOfItem == leftOfItemOfCurrentShape)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void Menu_NewGame_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void MenuPause_Click(object sender, RoutedEventArgs e)
@@ -78,6 +143,7 @@ namespace Tetris
 
         private void MenuExit_Click(object sender, RoutedEventArgs e)
         {
+            _gameTimer.Stop();
             Application.Current.Shutdown();
         }
 
