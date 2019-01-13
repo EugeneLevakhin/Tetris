@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Tetris" Height="632" Width="500"
         WindowStartupLocation="CenterScreen" WindowStyle="None" BorderBrush="Black"
-        ResizeMode="NoResize" MouseDown="Window_MouseDown">
+        ResizeMode="NoResize" MouseDown="Window_MouseDown" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
     
     <Grid Background="Black">
         <Grid.RowDefinitions>
@@ -19,7 +19,7 @@
             <Menu DockPanel.Dock="Left" Margin="2" Background="DarkCyan">
                 <MenuItem Header="Game" >
                     <MenuItem Header="New Game" Click="Menu_NewGame_Click" Background="DarkCyan"></MenuItem>
-                    <MenuItem Header="Puse &lt;Pause Key&gt;" Click="MenuPause_Click" Background="DarkCyan"></MenuItem>
+                    <MenuItem Header="Pause &lt;Pause Key&gt;" Click="MenuPause_Click" Background="DarkCyan"></MenuItem>
                     <MenuItem Header="Exit" Click="MenuExit_Click" Background="DarkCyan"></MenuItem>
                 </MenuItem>
             </Menu>
@@ -32,16 +32,10 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Canvas Width="360" Height="600" Background="#FF575734">
-                <!--<Border Height="30" Width="30" Canvas.Left="0" Canvas.Top="570" Background="Yellow"></Border>
-                <Border Height="30" Width="30" Canvas.Left="30" Canvas.Top="570" Background="Yellow"></Border>
-                <Border Height="30" Width="30" Canvas.Left="30" Canvas.Top="540" Background="Yellow"></Border>
-                <Border Height="30" Width="30" Canvas.Left="60" Canvas.Top="540" Background="Yellow"></Border>-->
-            </Canvas>
+            <Canvas ClipToBounds="True" Name="canvas" Width="360" Height="600" Background="#FF575734" />
 
             <Grid Grid.Column="1" Margin="5 0 0 0" Background="Green"></Grid>
 
         </Grid>
-        
     </Grid>
 </Window>
