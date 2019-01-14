@@ -18,11 +18,13 @@ using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
-    // TODO : disable left and right move
     // TODO : add all shapes
-    // TODO : Rotate shapes
+    // TODO : Rotate shapes if it is possible 
     // TODO : Remove lines, counting score, reduce timer interval
+    // TODO : End game
     // TODO : pause and new game
+    // TODO : change 30 literal (try GetBottom, GetRight)
+    // TODO : optimization
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -49,7 +51,7 @@ namespace Tetris
             {
                 if (IsCurrentShapeStacked())
                 {
-                    _currrentShape = new Square(canvas);
+                    _currrentShape = new Stick(canvas);
                 }
                 else
                 {
@@ -62,11 +64,11 @@ namespace Tetris
         {
             if (e.Key == Key.Left)
             {
-                _currrentShape.MoveLeft();
+                if (IsLeftMoveAllowed()) _currrentShape.MoveLeft();
             }
             else if (e.Key == Key.Right)
             {
-                _currrentShape.MoveRight();
+                if (IsRightMoveAllowed()) _currrentShape.MoveRight();
             }
             else if (e.Key == Key.Down)
             {
@@ -80,6 +82,86 @@ namespace Tetris
             {
                 _gameTimer.Interval = 200;
             }
+        }
+
+        private bool IsLeftMoveAllowed()
+        {
+            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            {
+                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
+                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
+                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
+
+                if (leftOfItemOfCurrentShape == 0)  // if left edge of canvas
+                {
+                    return false;
+                }
+                else
+                {
+                    foreach (var itemOfCanvas in canvas.Children)
+                    {
+                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                        double bottomOfCanvasItem = topOfCanvasItem + 30;
+                        double rightOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas) + 30;
+
+                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        {
+                            continue;
+                        }
+                        else if (leftOfItemOfCurrentShape == rightOfCanvasItem &&
+                                    (
+                                        (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
+                                        || (bottomOfItemOfCurrentShape > topOfCanvasItem && bottomOfItemOfCurrentShape < bottomOfCanvasItem)
+                                        || (leftOfItemOfCurrentShape == rightOfCanvasItem && topOfItemOfCurrentShape == topOfCanvasItem)
+                                    )
+                                )
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        private bool IsRightMoveAllowed()
+        {
+            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            {
+                double rightOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape) + 30;
+                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
+                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
+
+                if (rightOfItemOfCurrentShape == canvas.Width)  // if left edge of canvas
+                {
+                    return false;
+                }
+                else
+                {
+                    foreach (var itemOfCanvas in canvas.Children)
+                    {
+                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                        double bottomOfCanvasItem = topOfCanvasItem + 30;
+                        double leftOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas);
+
+                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        {
+                            continue;
+                        }
+                        else if (rightOfItemOfCurrentShape == leftOfCanvasItem &&
+                                    (
+                                        (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
+                                        || (bottomOfItemOfCurrentShape > topOfCanvasItem && bottomOfItemOfCurrentShape < bottomOfCanvasItem)
+                                        || (rightOfItemOfCurrentShape == leftOfCanvasItem && topOfItemOfCurrentShape == topOfCanvasItem)
+                                    )
+                                )
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         private bool IsCurrentShapeStacked()
