@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Tetris.Shapes
 {
@@ -23,21 +24,29 @@ namespace Tetris.Shapes
             Items = new List<Border>();
         }
 
-        public virtual void Rotate()
+        public void LocateShapeItemOnCanvas(Canvas canvas, double xPos, double yPos)
         {
+            Border item = new Border();
+            item.Width = _itemSize;
+            item.Height = _itemSize;
+            item.Background = Brushes.Yellow;
+            item.CornerRadius = new CornerRadius(2);
+
+            canvas.Children.Add(item);
+            Items.Add(item);
+
+            Canvas.SetLeft(item, xPos);
+            Canvas.SetTop(item, yPos);
         }
 
         public void MoveDown()
         {
-            try
+            try         // when Application shutdown, can be exception here
             {
                 foreach (var item in Items)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        double previosTop = Canvas.GetTop(item);
-                        Canvas.SetTop(item, previosTop + _moveStep);
-                    });
+                    double previosTop = Canvas.GetTop(item);
+                    Canvas.SetTop(item, previosTop + _moveStep);
                 }
             }
             catch (Exception)
@@ -49,11 +58,8 @@ namespace Tetris.Shapes
         {
             foreach (var item in Items)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    double previosLeft = Canvas.GetLeft(item);
-                    Canvas.SetLeft(item, previosLeft - _itemSize);
-                });
+                double previosLeft = Canvas.GetLeft(item);
+                Canvas.SetLeft(item, previosLeft - _itemSize);
             }
         }
 
@@ -61,12 +67,13 @@ namespace Tetris.Shapes
         {
             foreach (var item in Items)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    double previosLeft = Canvas.GetLeft(item);
-                    Canvas.SetLeft(item, previosLeft + _itemSize);
-                });
+                double previosLeft = Canvas.GetLeft(item);
+                Canvas.SetLeft(item, previosLeft + _itemSize);
             }
+        }
+
+        public virtual void Rotate()
+        {
         }
     }
 }

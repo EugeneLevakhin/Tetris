@@ -38,7 +38,7 @@ namespace Tetris
         {
             InitializeComponent();
 
-            _currrentShape = new Square(canvas);
+            _currrentShape = new TShape(canvas);
 
             _gameTimer = new Timer(200);
             _gameTimer.Elapsed += _gameTimer_Elapsed;
@@ -51,7 +51,7 @@ namespace Tetris
             {
                 if (IsCurrentShapeStacked())
                 {
-                    _currrentShape = new Stick(canvas);
+                    _currrentShape = new LShape(canvas);
                 }
                 else
                 {

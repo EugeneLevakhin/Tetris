@@ -4,28 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Tetris.Shapes
 {
-    class Stick : Shape
+    class LShape : Shape
     {
-        public Stick(Canvas canvas)
+        public LShape(Canvas canvas)
         {
-            double xPos = 3 * _itemSize;
-            double yPos = -20;
+            double yPos = -50;
+            double xPos = 3 * _itemSize; // TODO : 3 or 4 sizes
 
-            for (int i = 0; i < 4; i++)
+            base.LocateShapeItemOnCanvas(canvas, xPos, yPos);
+            yPos += _itemSize;
+
+            for (int i = 0; i < 3; i++)
             {
                 base.LocateShapeItemOnCanvas(canvas, xPos, yPos);
 
                 xPos += _itemSize;
             }
-        }
-
-        public override void Rotate()
-        {
-            // TODO
         }
     }
 }

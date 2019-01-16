@@ -4,26 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Tetris.Shapes
 {
-    class Square : Shape
+    class ZShape : Shape
     {
-        public Square(Canvas canvas)
+        public ZShape(Canvas canvas)
         {
+            double xPos = 3 * _itemSize; // TODO : 3 or 4 sizes
             double yPos = -50;
 
             for (int i = 0; i < 2; i++)
             {
-                double xPos = 4 * _itemSize;
-
                 for (int j = 0; j < 2; j++)
                 {
                     base.LocateShapeItemOnCanvas(canvas, xPos, yPos);
 
                     xPos += _itemSize;
                 }
+                xPos -= _itemSize;
                 yPos += _itemSize;
             }
         }
