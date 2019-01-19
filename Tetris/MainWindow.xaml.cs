@@ -1,30 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Tetris.Shapes;
+using Tetris.Entities;
 using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
-    // TODO : add all shapes
     // TODO : Rotate shapes if it is possible 
     // TODO : Remove lines, counting score, reduce timer interval
-    // TODO : End game
-    // TODO : pause and new game
-    // TODO : change 30 literal (try GetBottom, GetRight)
-    // TODO : optimization
+    // TODO : refactoring and optimization (change 30 literal (try GetBottom, GetRight))
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -32,17 +18,16 @@ namespace Tetris
     public partial class MainWindow : Window
     {
         private Timer _gameTimer;
-        private Shape _currrentShape;
+        private Shape _currentShape;
+        private bool _gameStarted;
+        private bool _pause;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _currrentShape = new TShape(canvas);
-
             _gameTimer = new Timer(200);
             _gameTimer.Elapsed += _gameTimer_Elapsed;
-            _gameTimer.Start();
         }
 
         private void _gameTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -51,28 +36,58 @@ namespace Tetris
             {
                 if (IsCurrentShapeStacked())
                 {
-                    _currrentShape = new LShape(canvas);
+                    if (IsCanvasOverflow())
+                    {
+                        gameOverTxtBlk.Text = "GAME OVER";
+                        _gameStarted = false;
+                        _gameTimer.Stop();
+                    }
+                    else
+                    {
+                        _currentShape = ShapesFactory.CreateShape(canvas);
+                    }
                 }
                 else
                 {
-                    _currrentShape.MoveDown();
+                    try     // when Application shutdown, can be exception here
+                    {
+                        // method works in another thread
+                        lock (this) { _currentShape.MoveDown(); }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             });
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Left)
+            if (!_gameStarted) return;
+
+            lock (this)
             {
-                if (IsLeftMoveAllowed()) _currrentShape.MoveLeft();
-            }
-            else if (e.Key == Key.Right)
-            {
-                if (IsRightMoveAllowed()) _currrentShape.MoveRight();
-            }
-            else if (e.Key == Key.Down)
-            {
-                if (_gameTimer.Interval != 20) _gameTimer.Interval = 20;
+                if (e.Key == Key.Left)
+                {
+                    if (IsLeftMoveAllowed()) _currentShape.MoveLeft();
+                }
+                else if (e.Key == Key.Right)
+                {
+                    if (IsRightMoveAllowed()) _currentShape.MoveRight();
+                }
+                else if (e.Key == Key.Down)
+                {
+                    if (_gameTimer.Interval != 20) _gameTimer.Interval = 20;
+                }
+                else if (e.Key == Key.Space)
+                {
+                    _currentShape.Rotate();
+                }
+                else if (e.Key == Key.Pause)
+                {
+                    SwitchPause();
+                }
             }
         }
 
@@ -86,7 +101,7 @@ namespace Tetris
 
         private bool IsLeftMoveAllowed()
         {
-            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            foreach (var itemOfCurrentShape in _currentShape.Items)
             {
                 double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
                 double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
@@ -126,7 +141,7 @@ namespace Tetris
 
         private bool IsRightMoveAllowed()
         {
-            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            foreach (var itemOfCurrentShape in _currentShape.Items)
             {
                 double rightOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape) + 30;
                 double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
@@ -166,7 +181,7 @@ namespace Tetris
 
         private bool IsCurrentShapeStacked()
         {
-            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            foreach (var itemOfCurrentShape in _currentShape.Items)
             {
                 double bottomOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape) + 30;
                 double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
@@ -201,7 +216,7 @@ namespace Tetris
             double topOfItem = Canvas.GetTop((Border)item);
             double leftOfItem = Canvas.GetLeft((Border)item);
 
-            foreach (var itemOfCurrentShape in _currrentShape.Items)
+            foreach (var itemOfCurrentShape in _currentShape.Items)
             {
                 double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
                 double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
@@ -214,13 +229,48 @@ namespace Tetris
             return false;
         }
 
+        private bool IsCanvasOverflow()
+        {
+            foreach (var itemOfCanvas in canvas.Children)
+            {
+                double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+
+                if (topOfCanvasItem < 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void Menu_NewGame_Click(object sender, RoutedEventArgs e)
         {
+            canvas.Children.Clear();
+            _currentShape = ShapesFactory.CreateShape(canvas);
+            _gameTimer.Start();
+            _gameStarted = true;
+            _pause = false;
+            gameOverTxtBlk.Text = string.Empty;
         }
 
         private void MenuPause_Click(object sender, RoutedEventArgs e)
         {
+            SwitchPause();
+        }
 
+        private void SwitchPause()
+        {
+            if (!_gameStarted) return;
+
+            if (_pause)
+            {
+                _gameTimer.Start();
+            }
+            else
+            {
+                _gameTimer.Stop();
+            }
+            _pause = !_pause;
         }
 
         private void MenuExit_Click(object sender, RoutedEventArgs e)

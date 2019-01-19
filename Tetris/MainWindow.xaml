@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Tetris" Height="632" Width="450"
         WindowStartupLocation="CenterScreen" WindowStyle="None" BorderBrush="Black"
-        ResizeMode="NoResize" MouseDown="Window_MouseDown" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
+        ResizeMode="NoResize" 
+        MouseDown="Window_MouseDown" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
     
     <Grid Background="Black">
         <Grid.RowDefinitions>
@@ -16,14 +17,14 @@
         </Grid.RowDefinitions>
 
         <DockPanel Background="#FF729DC2">
-            <Menu DockPanel.Dock="Left" Margin="2" Background="DarkCyan">
+            <Menu DockPanel.Dock="Left" Margin="5 2 2 2" Background="DarkCyan">
                 <MenuItem Header="Game" >
                     <MenuItem Header="New Game" Click="Menu_NewGame_Click" Background="DarkCyan"></MenuItem>
                     <MenuItem Header="Pause &lt;Pause Key&gt;" Click="MenuPause_Click" Background="DarkCyan"></MenuItem>
                     <MenuItem Header="Exit" Click="MenuExit_Click" Background="DarkCyan"></MenuItem>
                 </MenuItem>
             </Menu>
-            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Width="30" Foreground="#FF251212" FontWeight="Bold" Click="MenuExit_Click" Background="DarkCyan" Margin="2">X</Button>
+            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Width="30" Foreground="#FF251212" FontWeight="Bold" Click="MenuExit_Click" Background="DarkCyan" Margin="2 2 5 2">X</Button>
         </DockPanel>
 
         <Grid Grid.Row="1" Margin="5">
@@ -34,7 +35,15 @@
 
             <Canvas ClipToBounds="True" Name="canvas" Width="300" Height="600" Background="#FF575734" />
 
-            <Grid Grid.Column="1" Margin="5 0 0 0" Background="Green"></Grid>
+            <Grid Grid.Column="1" Margin="5 0 0 0" Background="Green">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Name="gameOverTxtBlk" Grid.Row="1" Margin="10" TextWrapping="WrapWithOverflow" Foreground="Red" FontSize="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
 
         </Grid>
     </Grid>

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using Tetris.Shapes;
 
-namespace Tetris.Shapes
+namespace Tetris.Entities.Shapes
 {
     class Square : Shape
     {
         public Square(Canvas canvas)
         {
+            double xPos = 4 * _itemSize;
             double yPos = -50;
 
             for (int i = 0; i < 2; i++)
             {
-                double xPos = 4 * _itemSize;
+                xPos = 4 * _itemSize;
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -26,6 +23,8 @@ namespace Tetris.Shapes
                 }
                 yPos += _itemSize;
             }
+
+            CenterPoint = new Point(xPos - _itemSize, yPos - _itemSize); // TODO: if need
         }
     }
 }

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Collections.Generic;
 
 namespace Tetris.Shapes
 {
@@ -15,6 +11,7 @@ namespace Tetris.Shapes
         protected double _itemSize;
 
         public List<Border> Items { get; }
+        public Point CenterPoint { get; set; }
 
         public Shape()
         {
@@ -24,7 +21,7 @@ namespace Tetris.Shapes
             Items = new List<Border>();
         }
 
-        public void LocateShapeItemOnCanvas(Canvas canvas, double xPos, double yPos)
+        protected void LocateShapeItemOnCanvas(Canvas canvas, double xPos, double yPos)
         {
             Border item = new Border();
             item.Width = _itemSize;
@@ -41,16 +38,11 @@ namespace Tetris.Shapes
 
         public void MoveDown()
         {
-            try         // when Application shutdown, can be exception here
+            foreach (var item in Items)
             {
-                foreach (var item in Items)
-                {
-                    double previosTop = Canvas.GetTop(item);
-                    Canvas.SetTop(item, previosTop + _moveStep);
-                }
-            }
-            catch (Exception)
-            {
+                double previosTop = Canvas.GetTop(item);
+                CenterPoint = new Point(CenterPoint.X, CenterPoint.Y - _moveStep);
+                Canvas.SetTop(item, previosTop + _moveStep);
             }
         }
 
@@ -59,6 +51,7 @@ namespace Tetris.Shapes
             foreach (var item in Items)
             {
                 double previosLeft = Canvas.GetLeft(item);
+                CenterPoint = new Point(CenterPoint.X - _itemSize, CenterPoint.Y);
                 Canvas.SetLeft(item, previosLeft - _itemSize);
             }
         }
@@ -68,6 +61,7 @@ namespace Tetris.Shapes
             foreach (var item in Items)
             {
                 double previosLeft = Canvas.GetLeft(item);
+                CenterPoint = new Point(CenterPoint.X + _itemSize, CenterPoint.Y);
                 Canvas.SetLeft(item, previosLeft + _itemSize);
             }
         }

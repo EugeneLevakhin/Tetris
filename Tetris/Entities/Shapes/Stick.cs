@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using Tetris.Shapes;
 
-namespace Tetris.Shapes
+namespace Tetris.Entities.Shapes
 {
     class Stick : Shape
     {
@@ -21,11 +17,8 @@ namespace Tetris.Shapes
 
                 xPos += _itemSize;
             }
-        }
 
-        public override void Rotate()
-        {
-            // TODO
+            CenterPoint = new Point(xPos - _itemSize - _itemSize / 2, yPos + _itemSize / 2);
         }
     }
 }
