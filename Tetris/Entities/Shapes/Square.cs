@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Tetris.Shapes;
 
 namespace Tetris.Entities.Shapes
@@ -17,7 +18,7 @@ namespace Tetris.Entities.Shapes
 
                 for (int j = 0; j < 2; j++)
                 {
-                    base.LocateShapeItemOnCanvas(canvas, xPos, yPos);
+                    base.LocateShapeItemOnCanvas(canvas, xPos, yPos, Brushes.Red);
 
                     xPos += _itemSize;
                 }
@@ -25,6 +26,10 @@ namespace Tetris.Entities.Shapes
             }
 
             CenterPoint = new Point(xPos - _itemSize, yPos - _itemSize); // TODO: if need
+        }
+
+        public override void Rotate()
+        {
         }
     }
 }

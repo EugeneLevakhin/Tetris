@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Tetris.Shapes;
 
 namespace Tetris.Entities.Shapes
@@ -13,7 +14,7 @@ namespace Tetris.Entities.Shapes
 
             for (int i = 0; i < 4; i++)
             {
-                base.LocateShapeItemOnCanvas(canvas, xPos, yPos);
+                base.LocateShapeItemOnCanvas(canvas, xPos, yPos, Brushes.Green);
 
                 xPos += _itemSize;
             }

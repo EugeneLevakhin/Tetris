@@ -21,12 +21,12 @@ namespace Tetris.Shapes
             Items = new List<Border>();
         }
 
-        protected void LocateShapeItemOnCanvas(Canvas canvas, double xPos, double yPos)
+        protected void LocateShapeItemOnCanvas(Canvas canvas, double xPos, double yPos, Brush color)
         {
             Border item = new Border();
             item.Width = _itemSize;
             item.Height = _itemSize;
-            item.Background = Brushes.Yellow;
+            item.Background = color;
             item.CornerRadius = new CornerRadius(2);
 
             canvas.Children.Add(item);
@@ -41,9 +41,10 @@ namespace Tetris.Shapes
             foreach (var item in Items)
             {
                 double previosTop = Canvas.GetTop(item);
-                CenterPoint = new Point(CenterPoint.X, CenterPoint.Y - _moveStep);
                 Canvas.SetTop(item, previosTop + _moveStep);
             }
+
+            CenterPoint = new Point(CenterPoint.X, CenterPoint.Y + _moveStep);
         }
 
         public void MoveLeft()
@@ -51,9 +52,10 @@ namespace Tetris.Shapes
             foreach (var item in Items)
             {
                 double previosLeft = Canvas.GetLeft(item);
-                CenterPoint = new Point(CenterPoint.X - _itemSize, CenterPoint.Y);
                 Canvas.SetLeft(item, previosLeft - _itemSize);
             }
+
+            CenterPoint = new Point(CenterPoint.X - _itemSize, CenterPoint.Y);
         }
 
         public void MoveRight()
@@ -61,13 +63,27 @@ namespace Tetris.Shapes
             foreach (var item in Items)
             {
                 double previosLeft = Canvas.GetLeft(item);
-                CenterPoint = new Point(CenterPoint.X + _itemSize, CenterPoint.Y);
                 Canvas.SetLeft(item, previosLeft + _itemSize);
             }
+
+            CenterPoint = new Point(CenterPoint.X + _itemSize, CenterPoint.Y);
         }
 
         public virtual void Rotate()
         {
+            foreach (var item in Items)
+            {
+                Point itemCoord = new Point(Canvas.GetLeft(item), Canvas.GetTop(item));
+                Point relativeCanvasCenterPoint = new Point(itemCoord.X - CenterPoint.X, itemCoord.Y - CenterPoint.Y);
+
+                Point relativeCanvasCenterPointRotated = new Point(relativeCanvasCenterPoint.Y, -relativeCanvasCenterPoint.X); // rotate
+
+                double x = relativeCanvasCenterPointRotated.X + CenterPoint.X;
+                double y = relativeCanvasCenterPointRotated.Y + CenterPoint.Y;
+
+                Canvas.SetLeft(item, x);
+                Canvas.SetTop(item, y - _itemSize);
+            }
         }
     }
 }
