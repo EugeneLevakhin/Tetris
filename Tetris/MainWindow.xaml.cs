@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,9 +9,8 @@ using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
-    // TODO : right removing full lines
     // TODO : Rotate shapes if it is possible 
-    // TODO : Remove lines, counting score, reduce timer interval
+    // TODO : counting score, reduce timer interval
     // TODO : Additional preview canvas
     // TODO : refactoring and optimization (change 30 literal (try GetBottom, GetRight))
 
@@ -36,10 +34,14 @@ namespace Tetris
 
         private void _gameTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            _gameTimer.Stop();
+
             Dispatcher.Invoke(() =>
             {
                 if (IsSetOfBordersStacked(_currentShape.Items.ToArray()))
                 {
+                    _currentShape = null;
+
                     RemoveFullLinesIfEnabled();
 
                     if (IsCanvasOverflow())
@@ -66,6 +68,8 @@ namespace Tetris
                     }
                 }
             });
+
+            _gameTimer.Start();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -219,6 +223,8 @@ namespace Tetris
 
         private bool IsItemOfCurrentShape(Border item)
         {
+            if (_currentShape == null) return false;
+
             double topOfItem = Canvas.GetTop((Border)item);
             double leftOfItem = Canvas.GetLeft((Border)item);
 
@@ -253,52 +259,73 @@ namespace Tetris
         {
             Dictionary<double, List<Border>> itemsDictionary = new Dictionary<double, List<Border>>();
 
-            for (int i = 0; i < canvas.Height; i += 30)
+            for (double i = 0; i < canvas.Height; i += 30)
             {
                 itemsDictionary.Add(i, new List<Border>());
             }
 
+
+
             foreach (Border item in canvas.Children)
             {
-                if (itemsDictionary.Count <= 20) itemsDictionary[Canvas.GetTop(item)].Add(item);
+                double key = Canvas.GetTop(item);
+                if (itemsDictionary.ContainsKey(key)) itemsDictionary[key].Add(item);
             }
 
-            bool removeOccured = false;
+            int countRemovedLines = 0;
 
+            double lowestRemovedLineTopCoord = 0;
+            // remove lines
             foreach (var dicItem in itemsDictionary)
             {
                 if (dicItem.Value.Count >= 10)
                 {
+                    if (dicItem.Key > lowestRemovedLineTopCoord) lowestRemovedLineTopCoord = dicItem.Key;
+
                     foreach (var border in dicItem.Value)
                     {
                         canvas.Children.Remove(border);
-                        removeOccured = true;
+                    }
+                    countRemovedLines++;
+                }
+            }
+
+            if (countRemovedLines > 0) FallAllHangingItems(countRemovedLines, lowestRemovedLineTopCoord);
+        }
+
+        private void FallAllHangingItems(int countRemovedLines, double lowestRemovedLineTopCoord)
+        {
+            for (int i = 0; i < countRemovedLines; i++)
+            {
+                foreach (Border item in canvas.Children)
+                {
+                    double top = Canvas.GetTop(item);
+
+                    if (top < lowestRemovedLineTopCoord)
+                    {
+                        Canvas.SetTop(item, top + 30);
                     }
                 }
             }
 
-            if (removeOccured) FallAllHangingItems();
-        }
 
-        private void FallAllHangingItems()
-        {
-            bool fallingOccured;
+            //bool fallingOccured;
 
-            do
-            {
-                fallingOccured = false;
+            //do
+            //{
+            //    fallingOccured = false;
 
-                foreach (Border item in canvas.Children)
-                {
-                    while (!IsSetOfBordersStacked(item))
-                    {
-                        double top = Canvas.GetTop(item);
-                        Canvas.SetTop(item, top + 30);
-                        fallingOccured = true;
-                    }
-                }
+            //    foreach (Border item in canvas.Children)
+            //    {
+            //        while (!IsSetOfBordersStacked(item))
+            //        {
+            //            double top = Canvas.GetTop(item);
+            //            Canvas.SetTop(item, top + 30);
+            //            fallingOccured = true;
+            //        }
+            //    }
 
-            } while (fallingOccured);
+            //} while (fallingOccured);
         }
 
         private void Menu_NewGame_Click(object sender, RoutedEventArgs e)
