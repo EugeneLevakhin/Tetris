@@ -38,7 +38,7 @@ namespace Tetris
 
             Dispatcher.Invoke(() =>
             {
-                if (IsSetOfBordersStacked(_currentShape.Items.ToArray()))
+                if (IsSetOfBordersStacked(_currentShape.Items.ToArray())) // null reference exception thrown here, when game over
                 {
                     _currentShape = null;
 
@@ -49,6 +49,7 @@ namespace Tetris
                         gameOverTxtBlk.Text = "GAME OVER";
                         _gameStarted = false;
                         _gameTimer.Stop();
+                        return;
                     }
                     else
                     {
@@ -76,6 +77,14 @@ namespace Tetris
         {
             if (!_gameStarted) return;
 
+            if (e.Key == Key.Pause)
+            {
+                SwitchPause();
+                return;
+            }
+
+            if (_pause) return;
+
             lock (this)
             {
                 if (e.Key == Key.Left)
@@ -93,10 +102,6 @@ namespace Tetris
                 else if (e.Key == Key.Space)
                 {
                     _currentShape.Rotate();
-                }
-                else if (e.Key == Key.Pause)
-                {
-                    SwitchPause();
                 }
             }
         }
@@ -123,13 +128,13 @@ namespace Tetris
                 }
                 else
                 {
-                    foreach (var itemOfCanvas in canvas.Children)
+                    foreach (Border itemOfCanvas in canvas.Children)
                     {
-                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
                         double bottomOfCanvasItem = topOfCanvasItem + 30;
-                        double rightOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas) + 30;
+                        double rightOfCanvasItem = Canvas.GetLeft(itemOfCanvas) + 30;
 
-                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
                         {
                             continue;
                         }
@@ -163,13 +168,13 @@ namespace Tetris
                 }
                 else
                 {
-                    foreach (var itemOfCanvas in canvas.Children)
+                    foreach (Border itemOfCanvas in canvas.Children)
                     {
-                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
                         double bottomOfCanvasItem = topOfCanvasItem + 30;
-                        double leftOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas);
+                        double leftOfCanvasItem = Canvas.GetLeft(itemOfCanvas);
 
-                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
                         {
                             continue;
                         }
@@ -202,12 +207,12 @@ namespace Tetris
                 }
                 else
                 {
-                    foreach (var itemOfCanvas in canvas.Children)
+                    foreach (Border itemOfCanvas in canvas.Children)
                     {
-                        double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
-                        double leftOfCanvasItem = Canvas.GetLeft((Border)itemOfCanvas);
+                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
+                        double leftOfCanvasItem = Canvas.GetLeft(itemOfCanvas);
 
-                        if (IsItemOfCurrentShape((Border)itemOfCanvas))  // if self
+                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
                         {
                             continue;
                         }
@@ -225,8 +230,8 @@ namespace Tetris
         {
             if (_currentShape == null) return false;
 
-            double topOfItem = Canvas.GetTop((Border)item);
-            double leftOfItem = Canvas.GetLeft((Border)item);
+            double topOfItem = Canvas.GetTop(item);
+            double leftOfItem = Canvas.GetLeft(item);
 
             foreach (var itemOfCurrentShape in _currentShape.Items)
             {
@@ -243,11 +248,11 @@ namespace Tetris
 
         private bool IsCanvasOverflow()
         {
-            foreach (var itemOfCanvas in canvas.Children)
+            foreach (Border itemOfCanvas in canvas.Children)
             {
-                double topOfCanvasItem = Canvas.GetTop((Border)itemOfCanvas);
+                double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
 
-                if (topOfCanvasItem < 0)
+                if (topOfCanvasItem <= 0)
                 {
                     return true;
                 }
@@ -259,12 +264,11 @@ namespace Tetris
         {
             Dictionary<double, List<Border>> itemsDictionary = new Dictionary<double, List<Border>>();
 
+            // just initialize
             for (double i = 0; i < canvas.Height; i += 30)
             {
                 itemsDictionary.Add(i, new List<Border>());
             }
-
-
 
             foreach (Border item in canvas.Children)
             {
@@ -307,25 +311,6 @@ namespace Tetris
                     }
                 }
             }
-
-
-            //bool fallingOccured;
-
-            //do
-            //{
-            //    fallingOccured = false;
-
-            //    foreach (Border item in canvas.Children)
-            //    {
-            //        while (!IsSetOfBordersStacked(item))
-            //        {
-            //            double top = Canvas.GetTop(item);
-            //            Canvas.SetTop(item, top + 30);
-            //            fallingOccured = true;
-            //        }
-            //    }
-
-            //} while (fallingOccured);
         }
 
         private void Menu_NewGame_Click(object sender, RoutedEventArgs e)
