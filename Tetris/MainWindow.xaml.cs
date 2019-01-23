@@ -38,10 +38,8 @@ namespace Tetris
 
             Dispatcher.Invoke(() =>
             {
-                if (IsSetOfBordersStacked(_currentShape.Items.ToArray())) // null reference exception thrown here, when game over
+                if (_currentShape.IsStacked(canvas)) // null reference exception thrown here, when game over
                 {
-                    _currentShape = null;
-
                     RemoveFullLinesIfEnabled();
 
                     if (IsCanvasOverflow())
@@ -89,11 +87,11 @@ namespace Tetris
             {
                 if (e.Key == Key.Left)
                 {
-                    if (IsLeftMoveAllowed()) _currentShape.MoveLeft();
+                    _currentShape.MoveLeft(canvas);
                 }
                 else if (e.Key == Key.Right)
                 {
-                    if (IsRightMoveAllowed()) _currentShape.MoveRight();
+                    _currentShape.MoveRight(canvas);
                 }
                 else if (e.Key == Key.Down)
                 {
@@ -101,7 +99,7 @@ namespace Tetris
                 }
                 else if (e.Key == Key.Space)
                 {
-                    _currentShape.Rotate();
+                    _currentShape.Rotate(canvas);
                 }
             }
         }
@@ -112,138 +110,6 @@ namespace Tetris
             {
                 _gameTimer.Interval = 200;
             }
-        }
-
-        private bool IsLeftMoveAllowed()
-        {
-            foreach (var itemOfCurrentShape in _currentShape.Items)
-            {
-                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
-                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
-
-                if (leftOfItemOfCurrentShape == 0)  // if left edge of canvas
-                {
-                    return false;
-                }
-                else
-                {
-                    foreach (Border itemOfCanvas in canvas.Children)
-                    {
-                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
-                        double bottomOfCanvasItem = topOfCanvasItem + 30;
-                        double rightOfCanvasItem = Canvas.GetLeft(itemOfCanvas) + 30;
-
-                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
-                        {
-                            continue;
-                        }
-                        else if (leftOfItemOfCurrentShape == rightOfCanvasItem &&
-                                    (
-                                        (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
-                                        || (bottomOfItemOfCurrentShape > topOfCanvasItem && bottomOfItemOfCurrentShape < bottomOfCanvasItem)
-                                        || (leftOfItemOfCurrentShape == rightOfCanvasItem && topOfItemOfCurrentShape == topOfCanvasItem)
-                                    )
-                                )
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        private bool IsRightMoveAllowed()
-        {
-            foreach (var itemOfCurrentShape in _currentShape.Items)
-            {
-                double rightOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape) + 30;
-                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
-
-                if (rightOfItemOfCurrentShape == canvas.Width)  // if left edge of canvas
-                {
-                    return false;
-                }
-                else
-                {
-                    foreach (Border itemOfCanvas in canvas.Children)
-                    {
-                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
-                        double bottomOfCanvasItem = topOfCanvasItem + 30;
-                        double leftOfCanvasItem = Canvas.GetLeft(itemOfCanvas);
-
-                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
-                        {
-                            continue;
-                        }
-                        else if (rightOfItemOfCurrentShape == leftOfCanvasItem &&
-                                    (
-                                        (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
-                                        || (bottomOfItemOfCurrentShape > topOfCanvasItem && bottomOfItemOfCurrentShape < bottomOfCanvasItem)
-                                        || (rightOfItemOfCurrentShape == leftOfCanvasItem && topOfItemOfCurrentShape == topOfCanvasItem)
-                                    )
-                                )
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        private bool IsSetOfBordersStacked(params Border[] borders)
-        {
-            foreach (var itemOfCurrentShape in borders)
-            {
-                double bottomOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape) + 30;
-                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
-
-                if (bottomOfItemOfCurrentShape == canvas.Height)  // if bottom edge of canvas
-                {
-                    return true;
-                }
-                else
-                {
-                    foreach (Border itemOfCanvas in canvas.Children)
-                    {
-                        double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
-                        double leftOfCanvasItem = Canvas.GetLeft(itemOfCanvas);
-
-                        if (IsItemOfCurrentShape(itemOfCanvas))  // if self
-                        {
-                            continue;
-                        }
-                        else if (bottomOfItemOfCurrentShape == topOfCanvasItem && leftOfItemOfCurrentShape == leftOfCanvasItem)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        private bool IsItemOfCurrentShape(Border item)
-        {
-            if (_currentShape == null) return false;
-
-            double topOfItem = Canvas.GetTop(item);
-            double leftOfItem = Canvas.GetLeft(item);
-
-            foreach (var itemOfCurrentShape in _currentShape.Items)
-            {
-                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
-
-                if (topOfItem == topOfItemOfCurrentShape && leftOfItem == leftOfItemOfCurrentShape)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private bool IsCanvasOverflow()

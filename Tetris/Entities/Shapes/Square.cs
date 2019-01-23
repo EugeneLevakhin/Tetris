@@ -28,7 +28,7 @@ namespace Tetris.Entities.Shapes
             CenterPoint = new Point(xPos - _itemSize, yPos - _itemSize); // TODO: if need
         }
 
-        public override void Rotate()
+        public override void Rotate(Canvas canvas)
         {
         }
     }
