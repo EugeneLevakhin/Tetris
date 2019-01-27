@@ -9,9 +9,6 @@ using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
-    // TODO : Rotate shapes if it is possible 
-    // TODO : counting score, reduce timer interval
-    // TODO : Additional preview canvas
     // TODO : refactoring and optimization (change 30 literal (try GetBottom, GetRight))
 
     /// <summary>
@@ -20,15 +17,20 @@ namespace Tetris
     public partial class MainWindow : Window
     {
         private Timer _gameTimer;
+        private double _currentInterval;
         private Shape _currentShape;
+        private Shape _currentPreviewShape;
         private bool _gameStarted;
         private bool _pause;
+        private int _score;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _gameTimer = new Timer(200);
+            _score = 0;
+            _currentInterval = 300;
+            _gameTimer = new Timer(_currentInterval);
             _gameTimer.Elapsed += _gameTimer_Elapsed;
         }
 
@@ -51,7 +53,9 @@ namespace Tetris
                     }
                     else
                     {
-                        _currentShape = ShapesFactory.CreateShape(canvas);
+                        _currentShape = ShapesFactory.CreateShape(canvas, _currentPreviewShape.GetType());
+                        previewCanvas.Children.Clear();
+                        _currentPreviewShape = ShapesFactory.CreateShape(previewCanvas);
                     }
                 }
                 else
@@ -95,7 +99,7 @@ namespace Tetris
                 }
                 else if (e.Key == Key.Down)
                 {
-                    if (_gameTimer.Interval != 20) _gameTimer.Interval = 20;
+                    if (_gameTimer.Interval != 15) _gameTimer.Interval = 15;
                 }
                 else if (e.Key == Key.Space)
                 {
@@ -108,7 +112,7 @@ namespace Tetris
         {
             if (e.Key == Key.Down)
             {
-                _gameTimer.Interval = 200;
+                _gameTimer.Interval = _currentInterval;
             }
         }
 
@@ -177,16 +181,29 @@ namespace Tetris
                     }
                 }
             }
+
+            _currentInterval -= countRemovedLines;
+            _score += countRemovedLines;
+            gameScoreTxtBlk.Text = $"Score: {_score}";
         }
 
         private void Menu_NewGame_Click(object sender, RoutedEventArgs e)
         {
             canvas.Children.Clear();
             _currentShape = ShapesFactory.CreateShape(canvas);
+
+            previewCanvas.Children.Clear();
+            _currentPreviewShape = ShapesFactory.CreateShape(previewCanvas);
+
+            _gameTimer.Interval = 300;
+            _score = 0;
             _gameTimer.Start();
+
             _gameStarted = true;
             _pause = false;
+
             gameOverTxtBlk.Text = string.Empty;
+            gameScoreTxtBlk.Text = "Score: ";
         }
 
         private void MenuPause_Click(object sender, RoutedEventArgs e)

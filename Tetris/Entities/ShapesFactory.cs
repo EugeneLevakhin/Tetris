@@ -14,10 +14,12 @@ namespace Tetris.Entities
             _randomFactor = new Random();
         }
 
-        public static Shape CreateShape(Canvas canvas)
+        public static Shape CreateShape(Canvas canvas, Type type = null)
         {
             string[] shapeTypes = Enum.GetNames(typeof(ShapeType));
             string shapeTypeName = shapeTypes[_randomFactor.Next(shapeTypes.Length)];
+
+            if (type != null) shapeTypeName = type.Name;
 
             return GetShapeByTypeName(shapeTypeName, canvas);
         }

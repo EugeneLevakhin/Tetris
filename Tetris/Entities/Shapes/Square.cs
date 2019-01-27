@@ -12,9 +12,17 @@ namespace Tetris.Entities.Shapes
             double xPos = 4 * _itemSize;
             double yPos = -50;
 
+            if (canvas.Name == "previewCanvas")
+            {
+                xPos = _itemSize;
+                yPos = _itemSize;
+            }
+
             for (int i = 0; i < 2; i++)
             {
                 xPos = 4 * _itemSize;
+
+                if (canvas.Name == "previewCanvas") xPos = _itemSize;
 
                 for (int j = 0; j < 2; j++)
                 {

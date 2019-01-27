@@ -75,6 +75,15 @@ namespace Tetris.Shapes
 
         public virtual void Rotate(Canvas canvas)
         {
+            // save shape position before rotate
+            List<Point> originalShapePoints = new List<Point>();
+
+            foreach (var item in Items)
+            {
+                originalShapePoints.Add(new Point(Canvas.GetLeft(item), Canvas.GetTop(item)));
+            }
+
+            // rotate and hide shape
             foreach (var item in Items)
             {
                 Point itemCoord = new Point(Canvas.GetLeft(item), Canvas.GetTop(item));
@@ -87,9 +96,62 @@ namespace Tetris.Shapes
 
                 Canvas.SetLeft(item, x);
                 Canvas.SetTop(item, y - _itemSize);
+
+                item.Visibility = Visibility.Hidden;
             }
 
-            if (IsCollisionOccured(this, canvas)) System.Console.WriteLine("COLLISION");
+            if (IsCollisionOccured(this, canvas))
+            {
+                bool collisionOccured = true;
+
+                if (IsLeftMoveAllowed(canvas))
+                {
+                    MoveLeft(canvas);
+                    collisionOccured = false;
+
+                    if (IsCollisionOccured(this, canvas))
+                    {
+                        collisionOccured = true;
+
+                        if (IsLeftMoveAllowed(canvas))
+                        {
+                            MoveLeft(canvas);
+                            collisionOccured = false;
+                        }
+                    }
+                }
+                else if (IsRightMoveAllowed(canvas))
+                {
+                    MoveRight(canvas);
+                    collisionOccured = false;
+
+                    if (IsCollisionOccured(this, canvas))
+                    {
+                        collisionOccured = true;
+
+                        if (IsRightMoveAllowed(canvas))
+                        {
+                            MoveRight(canvas);
+                            collisionOccured = false;
+                        }
+                    }
+                }
+                if (collisionOccured)
+                {
+                    // restore initial shape position if rotate not allowed
+                    for (int i = 0; i < Items.Count; i++)
+                    {
+                        Canvas.SetLeft(Items[i], originalShapePoints[i].X);
+                        Canvas.SetTop(Items[i], originalShapePoints[i].Y);
+                    }
+                }
+            }
+
+            // show shape
+            foreach (var item in Items)
+            {
+                item.Visibility = Visibility.Visible;
+            }
         }
 
         private bool IsLeftMoveAllowed(Canvas canvas)
@@ -98,7 +160,7 @@ namespace Tetris.Shapes
             {
                 double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
                 double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
+                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + _itemSize;
 
                 if (leftOfItemOfCurrentShape == 0)  // if left edge of canvas
                 {
@@ -109,14 +171,13 @@ namespace Tetris.Shapes
                     foreach (Border itemOfCanvas in canvas.Children)
                     {
                         double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
-                        double bottomOfCanvasItem = topOfCanvasItem + 30;
-                        double rightOfCanvasItem = Canvas.GetLeft(itemOfCanvas) + 30;
+                        double bottomOfCanvasItem = topOfCanvasItem + _itemSize;
+                        double rightOfCanvasItem = Canvas.GetLeft(itemOfCanvas) + _itemSize;
 
                         if (IsItemOfCurrentShape(itemOfCanvas))  // if self
                         {
                             continue;
                         }
-                        // TODO : review
                         else if (leftOfItemOfCurrentShape == rightOfCanvasItem &&
                                     (
                                         (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
@@ -137,9 +198,9 @@ namespace Tetris.Shapes
         {
             foreach (var itemOfCurrentShape in Items)
             {
-                double rightOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape) + 30;
+                double rightOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape) + _itemSize;
                 double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + 30;
+                double bottomOfItemOfCurrentShape = topOfItemOfCurrentShape + _itemSize;
 
                 if (rightOfItemOfCurrentShape == canvas.Width)  // if left edge of canvas
                 {
@@ -150,14 +211,13 @@ namespace Tetris.Shapes
                     foreach (Border itemOfCanvas in canvas.Children)
                     {
                         double topOfCanvasItem = Canvas.GetTop(itemOfCanvas);
-                        double bottomOfCanvasItem = topOfCanvasItem + 30;
+                        double bottomOfCanvasItem = topOfCanvasItem + _itemSize;
                         double leftOfCanvasItem = Canvas.GetLeft(itemOfCanvas);
 
                         if (IsItemOfCurrentShape(itemOfCanvas))  // if self
                         {
                             continue;
                         }
-                        // TODO : review
                         else if (rightOfItemOfCurrentShape == leftOfCanvasItem &&
                                     (
                                         (topOfItemOfCurrentShape > topOfCanvasItem && topOfItemOfCurrentShape < bottomOfCanvasItem)
@@ -178,7 +238,7 @@ namespace Tetris.Shapes
         {
             foreach (var itemOfCurrentShape in Items)
             {
-                double bottomOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape) + 30;
+                double bottomOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape) + _itemSize;
                 double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
 
                 if (bottomOfItemOfCurrentShape == canvas.Height)  // if bottom edge of canvas
@@ -213,18 +273,20 @@ namespace Tetris.Shapes
 
             foreach (var itemOfCurrentShape in Items)
             {
-                double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
+                if (item.Equals(itemOfCurrentShape)) return true;
 
-                if (topOfItem == topOfItemOfCurrentShape && leftOfItem == leftOfItemOfCurrentShape)
-                {
-                    return true;
-                }
+                //double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
+                //double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
+
+                //if (topOfItem == topOfItemOfCurrentShape && leftOfItem == leftOfItemOfCurrentShape)
+                //{
+                //    return true;
+                //}
             }
             return false;
         }
 
-        // TODO : not complete
+        // TODO : review
         private bool IsCollisionOccured(Shape shape, Canvas canvas)
         {
             foreach (Border itemOfShape in shape.Items)
@@ -232,17 +294,19 @@ namespace Tetris.Shapes
                 Point shapeItemCoord = new Point(Canvas.GetLeft(itemOfShape), Canvas.GetTop(itemOfShape));
 
                 // if item outside canvas
-                if (shapeItemCoord.X < 0 || shapeItemCoord.X > canvas.Width - 30 || shapeItemCoord.Y + 30 > canvas.Height)
+                if (shapeItemCoord.X < 0 || shapeItemCoord.X > canvas.Width - _itemSize || shapeItemCoord.Y + _itemSize > canvas.Height)
                 {
                     return true;
                 }
 
                 foreach (Border itemOfCanvas in canvas.Children)
                 {
+                    if (IsItemOfCurrentShape(itemOfCanvas)) continue;
+
                     Point canvasItemCoord = new Point(Canvas.GetLeft(itemOfCanvas), Canvas.GetTop(itemOfCanvas));
 
-                    if (shapeItemCoord.X >= canvasItemCoord.X + 30 || shapeItemCoord.X + 30 <= canvasItemCoord.X
-                        || shapeItemCoord.Y >= canvasItemCoord.Y + 30 || shapeItemCoord.Y + 30 <= canvasItemCoord.Y)
+                    if (shapeItemCoord.X >= canvasItemCoord.X + _itemSize || shapeItemCoord.X + _itemSize <= canvasItemCoord.X
+                        || shapeItemCoord.Y >= canvasItemCoord.Y + _itemSize || shapeItemCoord.Y + _itemSize <= canvasItemCoord.Y)
                     {
                         continue;
                     }

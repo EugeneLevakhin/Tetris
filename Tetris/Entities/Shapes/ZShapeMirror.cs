@@ -12,6 +12,12 @@ namespace Tetris.Entities.Shapes
             double xPos = 4 * _itemSize;
             double yPos = -80;
 
+            if (canvas.Name == "previewCanvas")
+            {
+                xPos = _itemSize;
+                yPos = 0;
+            }
+
             for (int i = 0; i < 2; i++)
             {
                 base.LocateShapeItemOnCanvas(canvas, xPos, yPos, Brushes.Azure);
