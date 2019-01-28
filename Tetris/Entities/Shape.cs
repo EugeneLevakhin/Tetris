@@ -268,25 +268,13 @@ namespace Tetris.Shapes
 
         private bool IsItemOfCurrentShape(Border item)
         {
-            double topOfItem = Canvas.GetTop(item);
-            double leftOfItem = Canvas.GetLeft(item);
-
             foreach (var itemOfCurrentShape in Items)
             {
                 if (item.Equals(itemOfCurrentShape)) return true;
-
-                //double topOfItemOfCurrentShape = Canvas.GetTop(itemOfCurrentShape);
-                //double leftOfItemOfCurrentShape = Canvas.GetLeft(itemOfCurrentShape);
-
-                //if (topOfItem == topOfItemOfCurrentShape && leftOfItem == leftOfItemOfCurrentShape)
-                //{
-                //    return true;
-                //}
             }
             return false;
         }
 
-        // TODO : review
         private bool IsCollisionOccured(Shape shape, Canvas canvas)
         {
             foreach (Border itemOfShape in shape.Items)

@@ -9,7 +9,7 @@ using Shape = Tetris.Shapes.Shape;
 
 namespace Tetris
 {
-    // TODO : refactoring and optimization (change 30 literal (try GetBottom, GetRight))
+    // TODO : refactoring and optimization
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -40,34 +40,36 @@ namespace Tetris
 
             Dispatcher.Invoke(() =>
             {
-                if (_currentShape.IsStacked(canvas)) // null reference exception thrown here, when game over
+                lock (this)
                 {
-                    RemoveFullLinesIfEnabled();
-
-                    if (IsCanvasOverflow())
+                    if (_currentShape.IsStacked(canvas))
                     {
-                        gameOverTxtBlk.Text = "GAME OVER";
-                        _gameStarted = false;
-                        _gameTimer.Stop();
-                        return;
+                        RemoveFullLinesIfEnabled();
+
+                        if (IsCanvasOverflow())
+                        {
+                            gameOverTxtBlk.Text = "GAME OVER";
+                            _gameStarted = false;
+                            _gameTimer.Stop();
+                            return;
+                        }
+                        else
+                        {
+                            _currentShape = ShapesFactory.CreateShape(canvas, _currentPreviewShape.GetType());
+                            previewCanvas.Children.Clear();
+                            _currentPreviewShape = ShapesFactory.CreateShape(previewCanvas);
+                        }
                     }
                     else
                     {
-                        _currentShape = ShapesFactory.CreateShape(canvas, _currentPreviewShape.GetType());
-                        previewCanvas.Children.Clear();
-                        _currentPreviewShape = ShapesFactory.CreateShape(previewCanvas);
-                    }
-                }
-                else
-                {
-                    try     // when Application shutdown, can be exception here
-                    {
-                        // method works in another thread
-                        lock (this) { _currentShape.MoveDown(); }
-                    }
-                    catch (Exception)
-                    {
+                        try     // when Application shutdown, can be exception here
+                        {
+                            _currentShape.MoveDown();
+                        }
+                        catch (Exception)
+                        {
 
+                        }
                     }
                 }
             });
@@ -110,9 +112,12 @@ namespace Tetris
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Down)
+            lock (this)
             {
-                _gameTimer.Interval = _currentInterval;
+                if (e.Key == Key.Down)
+                {
+                    _gameTimer.Interval = _currentInterval;
+                }
             }
         }
 
@@ -132,6 +137,8 @@ namespace Tetris
 
         private void RemoveFullLinesIfEnabled()
         {
+            // dictionary represent collection all lines in canvas, where key - top coordinate of line
+            // value - list of items on line
             Dictionary<double, List<Border>> itemsDictionary = new Dictionary<double, List<Border>>();
 
             // just initialize
@@ -140,6 +147,7 @@ namespace Tetris
                 itemsDictionary.Add(i, new List<Border>());
             }
 
+            // fill dictionary
             foreach (Border item in canvas.Children)
             {
                 double key = Canvas.GetTop(item);
@@ -195,7 +203,8 @@ namespace Tetris
             previewCanvas.Children.Clear();
             _currentPreviewShape = ShapesFactory.CreateShape(previewCanvas);
 
-            _gameTimer.Interval = 300;
+            _currentInterval = 300;
+            _gameTimer.Interval = _currentInterval;
             _score = 0;
             _gameTimer.Start();
 
