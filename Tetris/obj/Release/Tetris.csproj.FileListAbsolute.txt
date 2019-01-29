@@ -12,3 +12,4 @@ C:\Users\eugen\source\repos\Tetris\Tetris\obj\Release\Tetris.csproj.GenerateReso
 C:\Users\eugen\source\repos\Tetris\Tetris\obj\Release\Tetris.csproj.CoreCompileInputs.cache
 C:\Users\eugen\source\repos\Tetris\Tetris\obj\Release\Tetris.exe
 C:\Users\eugen\source\repos\Tetris\Tetris\obj\Release\Tetris.pdb
+C:\Users\eugen\source\repos\Tetris\Tetris\obj\Release\Tetris.csprojAssemblyReference.cache

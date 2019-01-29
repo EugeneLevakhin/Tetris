@@ -112,13 +112,16 @@ namespace Tetris
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            lock (this)
+            Dispatcher.Invoke(() =>
             {
-                if (e.Key == Key.Down)
+                lock (this)
                 {
-                    _gameTimer.Interval = _currentInterval;
+                    if (e.Key == Key.Down)
+                    {
+                        _gameTimer.Interval = _currentInterval;
+                    }
                 }
-            }
+            });
         }
 
         private bool IsCanvasOverflow()
